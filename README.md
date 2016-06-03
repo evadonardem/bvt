@@ -1,3 +1,5 @@
 # Benguet Vegetable Trading --- Web App
-# Admin Updates
-# ...
+## Admin Updates
+/dashboard
+
+/dashboard/products

@@ -6,7 +6,7 @@ Dashboard > Products
 
 @section('content')
 <ul class="breadcrumb">
-	<li><a href=""><i class="fa fa-dashboard"></i> Dashboard</a></li>
+	<li><a href="{{ url('dashboard') }}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
 	<li class="active">Products</li>
 </ul>
 <div class="row">
@@ -118,6 +118,7 @@ BVTProductManagement.initProductGrid = function() {
 		{ field: 'id', title: 'ID', filterable: false, width: 100},
 		{ field: 'name', title: 'Name' },
 		{ field: 'latest_price', title: 'Latest Price as of {{ date('M d, Y') }}', filterable: false, format: 'Php. {0}', attributes: { style: 'text-align: right;' } },
+		{ field: 'latest_price_datetime_posted', title: 'Date/Time Posted', filterable: false },
 		{ template: '<a href="#= add_unit_price_url #" class="grid-add-button"><i class="fa fa-lg fa-plus"></i></a>', width: 40 },
 		{ template: '<a href="#= price_history_url #" class="grid-history-button"><i class="fa fa-lg fa-history"></i></a>', width: 40 },
 		{ template: '<a href="javascript:void(0)" class="grid-edit-button"><i class="fa fa-lg fa-edit"></i></a>', width: 40 },

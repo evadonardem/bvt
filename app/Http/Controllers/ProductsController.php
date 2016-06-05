@@ -11,6 +11,10 @@ use App\Product;
 
 class ProductsController extends Controller
 {
+    public function __construct() {
+        $this->middleware('auth', ['except' => 'index']);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -25,7 +29,8 @@ class ProductsController extends Controller
         }])->orderBy('name', 'asc')->get();
         if($request->ajax()) {
             foreach ($products as &$product) {
-                $product->latest_price = (count($product->prices)>0) ? $product->prices[0]->unit_price : '-';
+                $product->latest_price = (count($product->prices)>0) ? $product->prices[0]->unit_price : null;
+                $product->latest_price_datetime_posted = (count($product->prices)>0) ? $product->prices[0]->datetime_posted : null;
                 $product->add_unit_price_url = action('ProductsPricesController@store', [$product->id]);
                 $product->price_history_url = action('ProductsPricesController@index', [$product->id]);
                 $product->delete_url = action('ProductsController@destroy', $product->id);
@@ -33,6 +38,9 @@ class ProductsController extends Controller
             return $products;
         }
 
+        if(!$request->user()) {
+            return redirect('login');
+        }
         return view('products.index');
     }
 

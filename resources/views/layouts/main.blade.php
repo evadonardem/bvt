@@ -46,13 +46,24 @@
 		<!-- Collect the nav links, forms, and other content for toggling -->
 		<div class="collapse navbar-collapse" id="bvt-navbar-collapse">
 			<ul class="nav navbar-nav">
-				<li class="{{ Request::is('/') ? 'active' : null }}"><a href="#"><i class="fa fa-home"></i> HOME</a></li>
+				<li class="{{ Request::is('/') || Request::is('home') ? 'active' : null }}"><a href="{{ action('HomeController@index') }}"><i class="fa fa-home"></i> HOME</a></li>
 				<li class="{{ Request::is('pricewatch*') ? 'active' : null }}"><a href="{{ action('PriceWatchController@index') }}"><i class="fa fa-eye"></i> PRICE WATCH</a></li>
 				<li class="{{ Request::is('pricetrends*') ? 'active' : null }}"><a href="{{ action('PriceTrendsController@index') }}"><i class="fa fa-line-chart"></i> PRICE TRENDS</a></li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
-				<li><a href=""><span class="glyphicon glyphicon-user"></span> DMedrano</a></li>
-				<li><a href=""><span class="glyphicon glyphicon-cog"></span> Settings</a></li>
+				@if(Auth::guest())
+				<li><a href="{{ url('login') }}"><span class="glyphicon glyphicon-log-in"></span> Log-in</a></li>
+				@else
+				<li class="{{ Request::is('dashboard*') ? 'active' : null }}"><a href="{{ url('dashboard') }}"><i class="fa fa-dashboard"></i> DASHBOARD</a></li>											
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+						<span class="glyphicon glyphicon-user"></span> {{ Auth::user()->name }}
+					</a>
+					<ul class="dropdown-menu">
+						<li><a href="{{ url('logout') }}"><span class="glyphicon glyphicon-log-out"></span> Log-out</a></li>
+					</ul>
+				</li>
+				@endif
 			</ul>
 		</div>
 	</div>

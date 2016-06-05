@@ -41,9 +41,9 @@ Route::group(['middleware' => ['web']], function () {
 
 	/* DASHBOARD EXCLUSIVE FOR ADMINISTRATORS */
 	Route::group(['prefix' => 'dashboard'], function() {
-		Route::get('/', function() {
+		Route::get('/', ['middleware' => 'auth', function() {
 			return view('dashboard.index');
-		});
+		}]);
 		Route::resource('products', 'ProductsController');		
 		Route::post('productnameunique', ['uses' => 'ProductsController@productNameUnique']);	
 		Route::resource('products.prices', 'ProductsPricesController');
@@ -68,6 +68,32 @@ Route::group(['middleware' => ['web']], function () {
 		Auth::logout();
 	});	
 
+	Route::get('currentdatetime', function() {
+		return date('Y-m-d H:i:s');
+	});
+
+
+	/* AUTHENTICATION */
+	Route::get('login', function() {
+		if(!Auth::guest()) {
+			return redirect('dashboard');
+		}	
+		return view('auth.log-in');
+	});	
+	Route::post('authenticate', function() {
+		$email = Request::input('email');
+		$password = Request::input('password');
+
+		if(Auth::attempt(['email' => $email, 'password' => $password]))	{
+			return redirect('dashboard');
+		}	
+		return redirect('login');
+	});
+	Route::get('logout', function() {
+		Auth::logout();
+		return redirect('login');
+	});
+
 	/* FOR TESTING */
 	Route::get('install', function() {
 		App\User::create([
@@ -85,7 +111,7 @@ Route::group(['middleware' => ['web']], function () {
         foreach($products as $product) {
             for($i=0; $i<$instances; $i++) {
                 $product->prices()->create([
-                    'datetime_posted' => $offset_date->format('Y-m-d') . ' ' . $faker->time($format = 'H-i-s', $max = 'now'),
+                    'datetime_posted' => $offset_date->format('Y-m-d') . ' ' . $faker->time($format = 'H:i:s', $max = 'now'),
                     'unit_price' => $faker->randomFloat(2, 10, 500)
                 ]);
             }

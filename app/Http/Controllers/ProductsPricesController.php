@@ -21,8 +21,9 @@ class ProductsPricesController extends Controller
     {
         $product = Product::where('id', '=', $product_id)->with(['prices'=>function($query){
             $query->orderBy('datetime_posted', 'desc');
-        }])->get();
-        return $product;
+        }])->first();
+
+        return $product->prices;
     }
 
     /**

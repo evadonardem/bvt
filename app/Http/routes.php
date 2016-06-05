@@ -41,10 +41,11 @@ Route::group(['middleware' => ['web']], function () {
 
 	/* DASHBOARD EXCLUSIVE FOR ADMINISTRATORS */
 	Route::group(['prefix' => 'dashboard'], function() {
+		Route::get('/', function() {
+			return view('dashboard.index');
+		});
 		Route::resource('products', 'ProductsController');		
-		/* CHECK PRODUCT NAME UNIQUE*/
 		Route::post('productnameunique', ['uses' => 'ProductsController@productNameUnique']);	
-
 		Route::resource('products.prices', 'ProductsPricesController');
 	});	
 

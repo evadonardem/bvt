@@ -9,42 +9,17 @@ Dashboard > Products
 	<li><a href=""><i class="fa fa-dashboard"></i> Dashboard</a></li>
 	<li class="active">Products</li>
 </ul>
-
 <div class="row">
-	<div class="col-md-8 col-sm-8">
-		<div class="row">
-			<div class="col-md-12 col-sm-12">
-				<input id="datepicker" class="pull-right">
-			</div>			
-		</div>
-		<hr>
-		<div class="row">
-			<div class="col-md-12 col-sm-12">
-				<div id="grid"></div>				
-				<input type="hidden" name="_token" value="{{ csrf_token() }}">
-			</div>
-		</div>				
+	<div class="col-md-12 col-sm-12">		
+		<div id="grid"></div>				
+		<input type="hidden" name="_token" value="{{ csrf_token() }}">			
 	</div>
-	<div class="col-md-4 col-sm-4">
-		<div class="well">
-			<form id="addProductForm">
-				<div class="row">
-					<div class="col-md-12 col-sm-12">
-						<label>Product Name</label>
-					</div>
-					<div class="col-md-12 col-sm-12">
-						<input name="name" class="k-input k-textbox" style="width: 100%;" required>
-					</div>
-				</div>				
-				<div class="row">
-					<div class="col-md-12 col-sm-12">
-						<hr>
-						<button class="k-button k-primary pull-right">Add</button>
-					</div>
-				</div>
-			</form>
-		</div>
-	</div>	
+</div>
+<hr>
+<div class="row">
+	<div class="col-md-12 col-sm-12">
+		<button id="addProductBtn" class="k-button k-primary pull-right"><i class="fa fa-lg fa-plus"></i> Add Product</button>
+	</div>
 </div>
 @stop
 
@@ -58,68 +33,79 @@ BVTProductManagement.init = function() {
 	ref._token = $("input[name='_token']").val();
 	ref.initProductGrid();
 	ref.initAddProductForm();
-
-	$('#datepicker').kendoDatePicker({
-		start: 'year',
-		depth: 'year',
-		format: 'yyyy MMM',
-		footer: false,
-		value: new Date()
-	});	
-
-	$('#panelbar').kendoPanelBar();
 }
 BVTProductManagement.initAddProductForm = function() {
 	var ref = this;
-	var validator = $('#addProductForm').kendoValidator({
-		rules: {
-			nameUnique: function(input) {
-				var status = null;
-				if(input.is('input[name="name"]')) {					
-					$.ajaxSetup({ async: false });
-					$.post("{{ action('ProductsController@productNameUnique') }}", { name: input.val(), _token: ref._token }, function(r) {
-						if($.isEmptyObject(r)) {
-							status = true;
-						} else {
-							status = false;
-						}
-						return status;						
-					}, 'json');
+	$('#addProductBtn').click(function() {
+		var dialog = new BVTDialog();
+		dialog.config.title = '<i class="fa fa-lg fa-plus"></i> Add Product';
+
+		var content = $('<div/>');
+		content.append($('<label>Product Name</label>'));
+		content.append($('<input type="text" name="name" class="k-input k-textbox" required style="width: 100%">'));
+
+		dialog.content = content;
+
+		dialog.buttons = [
+			{ id: 'ok-btn', label: 'Ok', primary: true },
+			{ id: 'cancel-btn', label: 'Cancel' }
+		];
+
+		dialog.instance.center().open().pin();
+
+		var validator = dialog.instance.element.find('.dialog-content').kendoValidator({
+			rules: {
+				nameUnique: function(input) {
+					var status = null;
+					if(input.is('input[name="name"]')) {					
+						$.ajaxSetup({ async: false });
+						$.post("{{ action('ProductsController@productNameUnique') }}", { name: input.val(), _token: ref._token }, function(r) {
+							if($.isEmptyObject(r)) {
+								status = true;
+							} else {
+								status = false;
+							}
+							return status;						
+						}, 'json');
+					}
+
+					return status;
 				}
-
-				return status;
+			},
+			messages: {
+				required: 'Required',
+				nameUnique: 'Product name already exist.'
 			}
-		},
-		messages: {
-			required: 'Required',
-			nameUnique: 'Product name already exist.'
-		}
-	}).data('kendoValidator');
-	$('#addProductForm').submit(function() {
-		if(validator.validate()) {
-			var data = $('#addProductForm').serialize();
-			data += '&_token='+ref._token;
+		}).data('kendoValidator');
+
+
+		dialog.instance.element.find('#ok-btn').click(function() {
+
+			if(!validator.validate()) return false;
+
 			var url = "{{ action('ProductsController@store') }}";
-			$.post(url, data, function(product) {
-				if(!$.isEmptyObject(product)) {					
-					$('input[name="name"]').val('');
+			var name = dialog.instance.element.find('input[name="name"]').val();
+			$.post(url, { name: name, _token: ref._token }, function(product) {
+				if(!$.isEmptyObject(product)) {
+					var successDialog = new BVTDialog();
+					successDialog.config.title = '<i class="fa fa-lg fa-check-circle"></i> Success';		
+					successDialog.content = '<p><strong><em>'+product.name+'</em></strong> added successfully.</p>';
+					successDialog.buttons = [{ id: 'ok-btn', label: 'Ok'}];
+					successDialog.instance.center().open().pin();
 
-					var dialog = new BVTDialog();
-					dialog.config.title = '<i class="fa fa-lg fa-check-circle"></i> Success';		
-					dialog.content = '<p><strong><em>'+product.name+'</em></strong> added successfully.</p>';
-					dialog.buttons = [{ id: 'ok-btn', label: 'Ok'}];
-					dialog.instance.center().open().pin();
-
-					dialog.instance.element.find('#ok-btn').click(function() {
-						dialog.instance.close();
+					successDialog.instance.element.find('#ok-btn').click(function() {
+						successDialog.instance.close();
 					});
 
-					ref.productGrid.object.dataSource.add(product);					
-
+					ref.productGrid.object.dataSource.add(product);
 				}
-			});
-		}
-		return false;
+				dialog.instance.close();
+			}, 'json');				
+		});
+
+		dialog.instance.element.find('#cancel-btn').click(function() {
+			dialog.instance.close();
+		});
 	});
 }
 BVTProductManagement.initProductGrid = function() {
@@ -131,7 +117,7 @@ BVTProductManagement.initProductGrid = function() {
 	var columns = [
 		{ field: 'id', title: 'ID', filterable: false, width: 100},
 		{ field: 'name', title: 'Name' },
-		{ field: 'latest_price', title: 'Latest Price as of {{ date('M d, Y') }}', filterable: false, attributes: { style: 'text-align: right;' } },
+		{ field: 'latest_price', title: 'Latest Price as of {{ date('M d, Y') }}', filterable: false, format: 'Php. {0}', attributes: { style: 'text-align: right;' } },
 		{ template: '<a href="#= add_unit_price_url #" class="grid-add-button"><i class="fa fa-lg fa-plus"></i></a>', width: 40 },
 		{ template: '<a href="#= price_history_url #" class="grid-history-button"><i class="fa fa-lg fa-history"></i></a>', width: 40 },
 		{ template: '<a href="javascript:void(0)" class="grid-edit-button"><i class="fa fa-lg fa-edit"></i></a>', width: 40 },
@@ -149,7 +135,7 @@ BVTProductManagement.initProductGrid = function() {
 	};
 
 	grid.config.dataSource = dataSource;
-	grid.config.columns = columns;
+	grid.config.columns = columns;	
 
 	grid.dataBoundExtension = function(e) { 
 		var _grid = e.sender;
@@ -194,11 +180,12 @@ BVTProductManagement.initProductGrid = function() {
 			var row = $(this).closest('tr');
 			var dataItem = grid.object.dataItem(row);	
 			var priceHistoryURL = $(this).prop('href');
+
 			$.get(priceHistoryURL, function(r) {
 				var dialog = new BVTDialog();
-				dialog.config.title = '<i class="fa fa-lg fa-history"></i> Price History';	
+				dialog.config.title = '<i class="fa fa-lg fa-history"></i> <em>'+dataItem.name+'</em> Price History';	
 				dialog.config.width = '60%';
-
+				
 				var gridElement = $('<div/>');
 				dialog.content = gridElement;
 
@@ -214,9 +201,7 @@ BVTProductManagement.initProductGrid = function() {
 						}
 					},
 					schema: {
-						data: function(response) {
-							return response.prices;
-						}
+
 					},
 					pageSize: 5
 				};

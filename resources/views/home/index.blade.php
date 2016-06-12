@@ -33,14 +33,7 @@ BVT > Home
 			</div>
 		</div>
 	</div>
-</div>
-
-
-		
-
-
-
-		
+</div>		
 @stop
 
 @section('plugins')
@@ -53,11 +46,7 @@ BVT > Home
 var myChart;
 var req;
 $(function() {
-	loadUpdates();
-	setInterval(function() {
-		req.abort();
-		loadUpdates();
-	}, 10000);		
+	loadUpdates();		
 });
 function loadUpdates() {
 	req = $.getJSON("{{ action('HomeController@index') }}", function(r) {
@@ -140,6 +129,11 @@ function loadUpdates() {
 		});
 					
 		$('#myChartLegend').html(myChart.generateLegend());
+
+		setInterval(function() {
+			req.abort();
+			loadUpdates();
+		}, 10000);	
 	});
 }
 function randomNumberBetween(start, end) {

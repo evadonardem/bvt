@@ -44,7 +44,6 @@ BVT > Home
 @section('scripts')
 <script type="text/javascript">
 var myChart;
-var req;
 $(function() {
 	loadUpdates();		
 });
@@ -130,8 +129,7 @@ function loadUpdates() {
 					
 		$('#myChartLegend').html(myChart.generateLegend());
 
-		setInterval(function() {
-			req.abort();
+		setTimeout(function() {			
 			loadUpdates();
 		}, 10000);	
 	});

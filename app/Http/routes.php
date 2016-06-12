@@ -103,19 +103,33 @@ Route::group(['middleware' => ['web']], function () {
 		]);
 	});
 
-	/* FOR TESTING */
-	Route::get('faker/{offset_date}/{instances}', function($offset_date, $instances) {
-		$offset_date = \Carbon\Carbon::createFromFormat('Y-m-d', $offset_date);
-		$products = App\Product::all();        
-        $faker = Faker\Factory::create();         
-        foreach($products as $product) {
-            for($i=0; $i<$instances; $i++) {
-                $product->prices()->create([
-                    'datetime_posted' => $offset_date->format('Y-m-d') . ' ' . $faker->time($format = 'H:i:s', $max = 'now'),
-                    'unit_price' => $faker->randomFloat(2, 10, 500)
-                ]);
-            }
-        }
+
+	Route::get('peke', function() {
+		return view('faker.index');
+	});
+
+	Route::post('peke', function() {
+		$product = App\Product::find(Request::input('searchKey'));
+		$start = \Carbon\Carbon::createFromFormat('Y M', Request::input('start'))->startOfMonth();
+		$end = \Carbon\Carbon::createFromFormat('Y M', Request::input('end'))->endOfMonth();
+		$lowest = Request::input('lowest');
+		$highest = Request::input('highest');
+
+		$faker = Faker\Factory::create(); 
+		$instances = 5;
+
+		while($start<$end) {
+			for($i=0; $i<$instances; $i++) {
+				$product->prices()->create([
+	                'datetime_posted' => $start->format('Y-m-d') . ' ' . $faker->time($format = 'H:i:s', $max = 'now'),
+	                'unit_price' => $faker->randomFloat(2, $lowest, $highest),
+	                'user_id' => (Auth::guest()) ? null : Auth::user()->id
+	            ]);
+			}
+			$start->addDay();
+		}
+
+		return redirect(url('peke'))->with(['message' => 'Fake records inserted successfully.']);
 	});
 
 });

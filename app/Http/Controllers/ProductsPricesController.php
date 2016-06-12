@@ -41,7 +41,8 @@ class ProductsPricesController extends Controller
         $product = Product::find($product_id);
         $product->prices()->create([
         	'datetime_posted' => date('Y-m-d H:i:s'),
-            'unit_price' => $request->input('unit_price')
+            'unit_price' => $request->input('unit_price'),
+            'user_id' => $request->user()->id
         ]);
 
         return $product;

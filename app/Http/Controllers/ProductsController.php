@@ -53,6 +53,9 @@ class ProductsController extends Controller
     public function store(Request $request)
     {
         $product = Product::create($request->all());
+        $product->user_id = $request->user()->id;
+        $product->save();
+
         $product->add_unit_price_url = action('ProductsPricesController@store', [$product->id]);
         $product->price_history_url = action('ProductsPricesController@index', [$product->id]);
         $product->delete_url = action('ProductsController@destroy', $product->id);

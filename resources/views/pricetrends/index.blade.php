@@ -246,12 +246,11 @@ $(function() {
 				legendTemplate : "<div class=\"<%=name.toLowerCase()%>-legend\">" + 
 					"<p><strong>Legend: </strong></p>" + 
 					"<% for (var i=0; i<datasets.length; i++){%>" + 
-						"<div class=\"col-md-12\"><span style=\"background-color:<%=datasets[i].fillColor%>\">&nbsp;&nbsp;&nbsp;</span> <%if(datasets[i].label){%><%=datasets[i].label%><%}%></div>" + 
+						"<div class=\"col-md-12\"><span style=\"background-color:<%=datasets[i].strokeColor%>\">&nbsp;&nbsp;&nbsp;</span> <%if(datasets[i].label){%><%=datasets[i].label%><%}%></div>" + 
 					"<%}%></div>"
 			});
 						
 			$('#myChartLegend').html(myChart.generateLegend());
-
 		});
 
 	});

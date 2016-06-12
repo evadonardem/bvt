@@ -11,3 +11,8 @@ A simple web application that provides daily price updates of vegetables from be
 /dashboard
 
 /dashboard/products
+
+## Faker a.k.a. "Peke"
+/peke
+
+Use this link to generate dummy records for price history.

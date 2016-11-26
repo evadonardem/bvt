@@ -132,6 +132,31 @@ Route::group(['middleware' => ['web']], function () {
 		return redirect(url('peke'))->with(['message' => 'Fake records inserted successfully.']);
 	});
 
+
+	Route::post('vegetabledailypricetrend', function() {
+		$vegetables = Request::input('vegetables');
+		$startDate = \Carbon\Carbon::now()->startOfMonth();
+        $endDate = \Carbon\Carbon::now()->endOfMonth();
+        $products = App\Product::whereIn('id', $vegetables)
+        ->with(['prices' => function($query) use ($startDate, $endDate) {
+            $query->where('datetime_posted', '>=', $startDate->format('Y-m-d 00:00:00'));
+            $query->where('datetime_posted', '<=', $endDate->format('Y-m-d 23:59:59'));
+            $query->orderBy('datetime_posted', 'desc');
+        }])->orderBy('name', 'asc')->get();         
+
+        while($startDate<=$endDate) {
+        	foreach ($products as &$product) {
+        		$prices = $product->prices->filter(function($price) use ($startDate) {
+        			return $price->datetime_posted >= $startDate->format('Y-m-d 00:00:00') && $price->datetime_posted <= $startDate->format('Y-m-d 23:59:59');
+        		});
+        		$product->{$startDate->format('Y-m-d')} = $prices->avg('unit_price');
+        		unset($product->prices);
+        	}
+        	$startDate->addDay(1);
+        }        
+        return $products;
+	});
+
 });
 
 

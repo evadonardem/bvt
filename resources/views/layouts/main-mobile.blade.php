@@ -21,18 +21,15 @@
 <div data-role="drawer" data-position="right" id="user" data-init="initSignOut">
 	<ul data-role="listview">
 		<li>
-			<label for="">Hi! {{ Auth::user()->name }}</label>			
+			<label for="">{{ Auth::user()->name }}</label>			
 		</li>		
-	</ul>
-	<p>
-		<button id="signOutBtn" data-role="button" class="km-primary km-justified"><i class="fa fa-lg fa-sign-out"></i> Sign-out</button>
-	</p>
-</div>
-<div data-role="drawer" data-position="right" id="settings">	
-	<ul data-role="listview">
-		<li>T</li>
-		<li>X</li>
-	</ul>
+		<li>
+			<a href="#updateprice"><i class="fa fa-lg fa-cog"></i> Update Price</a>
+		</li>
+		<li>
+			<button id="signOutBtn" data-role="button" class="km-primary km-justified"><i class="fa fa-lg fa-sign-out"></i> Sign-out</button>
+		</li>
+	</ul>	
 </div>
 @else
 
@@ -40,6 +37,7 @@
 
 <script type="text/javascript" src="{{ asset('kendoui.core/js/jquery.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('kendoui.core/js/kendo.all.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('js/chart.min.js') }}"></script>
 
 <script type="text/javascript">
 function initSignOut(e) {	
@@ -56,7 +54,7 @@ function initSignOut(e) {
 
 <script type="text/javascript">
 	var app = new kendo.mobile.Application(document.body, {
-		//useNativeScrolling: true, 
+		useNativeScrolling: true, 
 		skin: "nova"
 	});
 </script>
